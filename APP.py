@@ -6,19 +6,27 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
+import os
 import openai
 
-# ✅ Usar clave desde Streamlit secrets
-api_key = st.secrets.get("OPENAI_API_KEY")
+# 🔐 API Key: compatible con local (.env) y nube (secrets)
+try:
+    api_key = st.secrets["OPENAI_API_KEY"]
+    st.sidebar.success("✅ API Key cargada desde secrets.")
+except Exception:
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+        api_key = os.getenv("OPENAI_API_KEY")
+        if api_key:
+            st.sidebar.success("✅ API Key cargada desde .env")
+        else:
+            st.sidebar.error("❌ No se encontró OPENAI_API_KEY en .env")
+    except Exception as e:
+        st.sidebar.error(f"❌ Error cargando dotenv: {e}")
+
 if api_key:
     openai.api_key = api_key
-
-# Verificación de API Key
-st.sidebar.markdown("### 🔐 Estado de API Key")
-if not api_key:
-    st.sidebar.error("❌ No se encontró OPENAI_API_KEY en secrets.")
-else:
-    st.sidebar.success(f"✅ API Key cargada: {api_key[:10]}...")
 
 # Título de la app
 st.title("📈 Análisis de Acciones con Yahoo Finance")
